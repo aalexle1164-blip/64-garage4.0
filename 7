@@ -1,0 +1,83 @@
+import React, { useState } from 'react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
+
+export default function Admin({ models, onBack, onAdd, onEdit, onDelete, darkMode }) {
+  const [form, setForm] = useState({
+    prototype: '',manufacturer:'',scale:'1:64',material:'合金 (Diecast)',price:'',releaseDate:'',imageUrl:''
+  });
+  const [editId, setEditId] = useState(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if(editId) {
+      onEdit({...form, id: editId, price: Number(form.price)});
+    } else {
+      onAdd({...form, price: Number(form.price)});
+    }
+    setEditId(null);
+    setForm({prototype:'',manufacturer:'',scale:'1:64',material:'合金 (Diecast)',price:'',releaseDate:'',imageUrl:''});
+  };
+
+  const startEdit = (item) => {
+    setEditId(item.id);
+    setForm(item);
+  };
+
+  return (
+    <div className={`min-h-screen p-6 md:p-10 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
+      <button onClick={onBack} className="flex items-center gap-1 mb-6 hover:text-blue-500">
+        <ArrowLeft size={18} /> 返回首页
+      </button>
+
+      <h2 className="text-2xl font-bold mb-6">车模管理后台</h2>
+
+      {/* 新增/编辑表单 */}
+      <form onSubmit={handleSubmit} className="max-w-2xl bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-10 space-y-4">
+        <input
+          placeholder="车型名称"
+          value={form.prototype}
+          onChange={e=>setForm({...form,prototype:e.target.value})}
+          className="w-full p-2.5 border dark:bg-gray-700 dark:border-gray-600 rounded-lg"
+          required
+        />
+        <input
+          placeholder="厂商"
+          value={form.manufacturer}
+          onChange={e=>setForm({...form,manufacturer:e.target.value})}
+          className="w-full p-2.5 border dark:bg-gray-700 dark:border-gray-600 rounded-lg"
+          required
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="比例" value={form.scale} onChange={e=>setForm({...form,scale:e.target.value})} className="p-2.5 border dark:bg-gray-700 rounded-lg"/>
+          <input placeholder="材质" value={form.material} onChange={e=>setForm({...form,material:e.target.value})} className="p-2.5 border dark:bg-gray-700 rounded-lg"/>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="价格" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} className="p-2.5 border dark:bg-gray-700 rounded-lg" required/>
+          <input placeholder="发售时间" value={form.releaseDate} onChange={e=>setForm({...form,releaseDate:e.target.value})} className="p-2.5 border dark:bg-gray-700 rounded-lg"/>
+        </div>
+        <input placeholder="图片链接" value={form.imageUrl} onChange={e=>setForm({...form,imageUrl:e.target.value})} className="w-full p-2.5 border dark:bg-gray-700 dark:border-gray-600 rounded-lg"/>
+        <button type="submit" className="w-full py-2.5 bg-blue-500 text-white rounded-lg font-medium">
+          {editId ? '保存修改' : '新增车模'}
+        </button>
+      </form>
+
+      {/* 列表管理 */}
+      <div className="space-y-3">
+        {models.map(item=>(
+          <div key={item.id} className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg">
+            <div>
+              <p className="font-medium">{item.prototype}</p>
+              <p className="text-sm text-gray-500">{item.manufacturer} · ￥{item.price}</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={()=>startEdit(item)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">编辑</button>
+              <button onClick={()=>onDelete(item.id)} className="px-3 py-1 bg-red-500 text-white rounded flex items-center gap-1">
+                <Trash2 size={14}/> 删除
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
